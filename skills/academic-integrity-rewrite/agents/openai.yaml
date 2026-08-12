@@ -1,0 +1,4 @@
+interface:
+  display_name: "学术论文诚信降重"
+  short_description: "在保留研究事实、证据链与引文的前提下重构中英文学术表达"
+  default_prompt: "Use $academic-integrity-rewrite to revise this academic passage for originality while preserving claims, evidence, numbers, and citations."

@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this skill in research or teaching, please cite the repository."
+title: "Academic Integrity Rewrite"
+type: software
+authors:
+  - name: "lin1111-1"
+repository-code: "https://github.com/lin1111-1/academic-integrity-rewrite"
+license: MIT
+version: 0.1.0
+date-released: 2026-08-12
