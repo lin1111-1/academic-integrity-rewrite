@@ -1,8 +1,11 @@
 import importlib.util
+import io
 import tempfile
 import unittest
 import zipfile
+from contextlib import redirect_stdout
 from pathlib import Path
+from unittest import mock
 
 MODULE_PATH = Path(__file__).parents[1] / "skills" / "academic-integrity-rewrite" / "scripts" / "audit_revision.py"
 SPEC = importlib.util.spec_from_file_location("audit_revision", MODULE_PATH)
@@ -25,10 +28,39 @@ class AuditRevisionTests(unittest.TestCase):
         self.assertIn("4.43%", result["numbers"]["missing_or_reduced"])
         self.assertIn("4.34%", result["numbers"]["added_or_increased"])
 
+    def test_changed_unit_is_reported(self):
+        result = audit_revision.audit("The specimen was heated to 450 K.", "The specimen was heated to 450 °C.", 4, 10)
+        self.assertIn("450K", result["measurements"]["missing_or_reduced"])
+        self.assertIn("450°C", result["measurements"]["added_or_increased"])
+
+    def test_equivalent_unit_spacing_is_ignored(self):
+        result = audit_revision.audit("The speed was 12 m s−1.", "A speed of 12 m s−1 was measured.", 4, 10)
+        self.assertEqual(result["measurements"]["missing_or_reduced"], {})
+        self.assertEqual(result["measurements"]["added_or_increased"], {})
+
+    def test_symbol_unit_is_reported(self):
+        result = audit_revision.audit("温度为 37 ℃。", "温度为 37 ℉。", 4, 10)
+        self.assertIn("37℃", result["measurements"]["missing_or_reduced"])
+        self.assertIn("37℉", result["measurements"]["added_or_increased"])
+
+    def test_cli_returns_warning_for_changed_unit(self):
+        with tempfile.TemporaryDirectory() as directory:
+            original = Path(directory) / "original.txt"
+            revised = Path(directory) / "revised.txt"
+            original.write_text("The specimen was heated to 450 K.", encoding="utf-8")
+            revised.write_text("The specimen was heated to 450 °C.", encoding="utf-8")
+            with mock.patch("sys.argv", ["audit_revision.py", str(original), str(revised)]):
+                with redirect_stdout(io.StringIO()):
+                    self.assertEqual(audit_revision.main(), 1)
+
     def test_citation_number_is_not_double_counted(self):
         result = audit_revision.audit("Prior work [12] agrees.", "Prior work agrees.", 4, 10)
         self.assertEqual(result["numbers"]["missing_or_reduced"], {})
         self.assertIn("[12]", result["citations"]["missing_or_reduced"])
+
+    def test_citation_with_unit_like_text_is_not_a_measurement(self):
+        result = audit_revision.audit("Prior work [12] agrees.", "Prior work agrees.", 4, 10)
+        self.assertEqual(result["measurements"]["missing_or_reduced"], {})
 
     def test_reads_docx_without_third_party_packages(self):
         document_xml = b'''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>

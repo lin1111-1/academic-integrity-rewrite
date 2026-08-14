@@ -14,6 +14,15 @@ from xml.etree import ElementTree as ET
 
 WORD_NS = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
 NUMBER_RE = re.compile(r"(?<![\w.])[+-]?(?:\d+(?:\.\d+)?|\.\d+)(?:\s*[–—-]\s*[+-]?\d+(?:\.\d+)?)?\s*%?")
+MEASUREMENT_RE = re.compile(
+    r"(?<![\w.])[+-]?(?:\d+(?:\.\d+)?|\.\d+)"
+    r"(?:\s*[–—-]\s*[+-]?(?:\d+(?:\.\d+)?|\.\d+))?"
+    r"\s*(?:%|°\s*[CF]|℃|℉|[kMGTcmµμnp]?"
+    r"(?:m|g|s|A|K|mol|cd|Hz|Pa|J|W|V|F|Ω|S|T|H|L|l)"
+    r"(?:\s*(?:[·⋅*/]|\s)\s*[kMGTcmµμnp]?"
+    r"(?:m|g|s|A|K|mol|cd|Hz|Pa|J|W|V|F|Ω|S|T|H|L|l))?"
+    r"(?:\s*(?:\^\s*)?[−-]?\d+)?)(?![\w])",
+)
 BRACKET_CITATION_RE = re.compile(r"\[(?:\d+[a-z]?\s*(?:[-–,;]\s*\d+[a-z]?\s*)*)\]", re.I)
 AUTHOR_YEAR_RE = re.compile(r"\((?:[A-Z][A-Za-z'’-]+(?:\s+et\s+al\.)?[^()]{0,60}?\b(?:19|20)\d{2}[a-z]?)(?:\s*;[^()]+)?\)")
 TOKEN_RE = re.compile(r"[A-Za-z]+(?:[-'][A-Za-z]+)*|\d+(?:\.\d+)?|[\u3400-\u9fff]")
@@ -68,8 +77,12 @@ def counter_diff(expected: Counter[str], actual: Counter[str]) -> dict[str, int]
 
 
 def audit(original: str, revised: str, ngram: int, limit: int) -> dict[str, object]:
-    original_numbers = normalized_items(NUMBER_RE, without_citations(original))
-    revised_numbers = normalized_items(NUMBER_RE, without_citations(revised))
+    original_without_citations = without_citations(original)
+    revised_without_citations = without_citations(revised)
+    original_numbers = normalized_items(NUMBER_RE, original_without_citations)
+    revised_numbers = normalized_items(NUMBER_RE, revised_without_citations)
+    original_measurements = normalized_items(MEASUREMENT_RE, original_without_citations)
+    revised_measurements = normalized_items(MEASUREMENT_RE, revised_without_citations)
     original_citations = normalized_items(BRACKET_CITATION_RE, original) + normalized_items(AUTHOR_YEAR_RE, original)
     revised_citations = normalized_items(BRACKET_CITATION_RE, revised) + normalized_items(AUTHOR_YEAR_RE, revised)
     spans = shared_spans(original, revised, ngram, limit)
@@ -77,6 +90,10 @@ def audit(original: str, revised: str, ngram: int, limit: int) -> dict[str, obje
         "numbers": {
             "missing_or_reduced": counter_diff(original_numbers, revised_numbers),
             "added_or_increased": counter_diff(revised_numbers, original_numbers),
+        },
+        "measurements": {
+            "missing_or_reduced": counter_diff(original_measurements, revised_measurements),
+            "added_or_increased": counter_diff(revised_measurements, original_measurements),
         },
         "citations": {
             "missing_or_reduced": counter_diff(original_citations, revised_citations),
@@ -105,7 +122,11 @@ def main() -> int:
     print(rendered)
     if args.json:
         args.json.write_text(rendered + "\n", encoding="utf-8")
-    has_fidelity_warning = any(report[key][kind] for key in ("numbers", "citations") for kind in ("missing_or_reduced", "added_or_increased"))
+    has_fidelity_warning = any(
+        report[key][kind]
+        for key in ("numbers", "measurements", "citations")
+        for kind in ("missing_or_reduced", "added_or_increased")
+    )
     return 1 if has_fidelity_warning else 0
 
 
