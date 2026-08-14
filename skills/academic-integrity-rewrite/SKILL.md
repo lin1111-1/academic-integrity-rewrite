@@ -53,7 +53,7 @@ Run the deterministic audit when both original and revision are available:
 python scripts/audit_revision.py ORIGINAL REVISED
 ```
 
-Use `--json PATH` for a machine-readable report. Treat its warnings as review prompts, not proof of plagiarism or correctness.
+Use `--json PATH` for a machine-readable report. It compares numbers, common unit-bearing measurements, and citation markers. Treat its warnings as review prompts, not proof of plagiarism or correctness; uncommon or field-specific unit notation still requires manual review.
 
 Then verify manually:
 

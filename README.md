@@ -12,7 +12,7 @@
 - 按 P0–P3 优先级处理诚信/技术、论证、表达和版式问题。
 - 覆盖摘要、引言/综述、方法、结果、讨论和结论。
 - 要求先建立“受保护事实账本”，再从证据图重写。
-- 附带零第三方依赖审计脚本，核对数字、引文标记和长重合片段。
+- 附带零第三方依赖审计脚本，核对数字、带单位测量值、引文标记和长重合片段。
 - 支持 `.txt`、`.md` 和 `.docx` 文本审计。
 
 ## 安装
@@ -42,7 +42,7 @@ python skills/academic-integrity-rewrite/scripts/audit_revision.py original.docx
 python skills/academic-integrity-rewrite/scripts/audit_revision.py original.md revised.md --json audit.json
 ```
 
-若脚本返回状态码 `1`，表示数字或引文集合发生变化，需要人工核对；这不自动表示改写错误。脚本也不能判定抄袭或科学正确性。
+若脚本返回状态码 `1`，表示数字、带单位测量值或引文集合发生变化，需要人工核对；这不自动表示改写错误。脚本也不能判定抄袭或科学正确性。
 
 ## 工作流
 
