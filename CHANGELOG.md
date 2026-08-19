@@ -7,6 +7,13 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+### Added
+
+- Structured bug report and feature request forms with privacy and academic-integrity safeguards.
+- Public roadmap, version targets, and release gates.
+- Cross-platform installation instructions and runnable audit examples.
+- CI, release, license, and test-status badges in the README.
+
 ## [0.1.0] - 2026-08-17
 
 ### Added

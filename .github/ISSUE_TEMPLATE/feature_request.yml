@@ -1,0 +1,64 @@
+name: Feature request
+description: 建议新能力、规则、格式支持或文档改进
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        欢迎提出功能建议。本项目只支持符合学术诚信的改写与核验，不接受规避检测、伪造引用或隐藏抄袭的功能请求。
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 提交前检查
+      options:
+        - label: 我已搜索现有 Issues 和路线图，确认建议尚未覆盖。
+          required: true
+        - label: 该建议不用于规避查重、伪造证据或其他学术不端行为。
+          required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: 建议类别
+      options:
+        - 引用格式或学科规则
+        - 审计与验证
+        - 文件格式支持
+        - Codex Skill 体验
+        - 文档与示例
+        - 测试与发布工程
+        - 其他
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: 要解决的问题
+      description: 描述用户场景、现有限制和受影响人群。
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 建议方案
+      description: 说明期望行为、输入输出和可能的验收标准。
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 替代方案
+      description: 已尝试的工作方式或可以接受的简化方案。
+  - type: textarea
+    id: examples
+    attributes:
+      label: 匿名化示例
+      description: 如需样例，只提供最小、匿名且有权分享的内容。
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: 参与意愿
+      options:
+        - label: 我愿意帮助补充需求或测试。
+        - label: 我愿意提交 Pull Request。

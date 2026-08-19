@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 私密安全报告
+    url: https://github.com/lin1111-1/academic-integrity-rewrite/security/advisories/new
+    about: 请通过私密安全公告报告潜在漏洞，不要公开敏感细节。
+  - name: 使用与贡献指南
+    url: https://github.com/lin1111-1/academic-integrity-rewrite/blob/main/CONTRIBUTING.md
+    about: 提交前请阅读贡献流程与数据保护要求。
