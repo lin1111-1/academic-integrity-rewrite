@@ -1,0 +1,75 @@
+name: Bug report
+description: 报告可复现的错误、误报或回归问题
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢报告问题。请勿粘贴未发表论文、受版权保护的全文、个人信息或其他敏感内容；请使用最小化且匿名化的复现样例。
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 提交前检查
+      options:
+        - label: 我已搜索现有 Issues，确认没有重复报告。
+          required: true
+        - label: 我提供的样例已匿名化，不包含未发表稿件或敏感信息。
+          required: true
+  - type: dropdown
+    id: component
+    attributes:
+      label: 受影响组件
+      options:
+        - Skill 工作流或指令
+        - audit_revision.py
+        - 安装或文档
+        - GitHub Actions / 测试
+        - 其他
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: 问题描述
+      description: 清楚说明实际发生了什么，以及为什么这是一个问题。
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 最小复现步骤
+      description: 请包含必要命令、匿名化输入和完整错误信息。
+      placeholder: |
+        1. 运行……
+        2. 输入……
+        3. 观察到……
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期行为
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: 项目版本或提交
+      placeholder: v0.1.0 或 commit SHA
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: 环境信息
+      description: 操作系统、Python 版本、Codex 客户端和相关文件格式。
+      placeholder: Windows 11; Python 3.12; Codex desktop; .docx
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: 补充信息
+      description: 可提供已脱敏的日志、截图或其他上下文。
