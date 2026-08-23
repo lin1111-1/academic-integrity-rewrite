@@ -1,0 +1,54 @@
+name: Anonymous usage feedback
+description: 分享匿名、可公开核验的使用体验，不提交论文内容
+title: "[Feedback]: "
+labels:
+  - feedback
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢分享真实使用反馈。请勿粘贴论文正文、未发表结果、个人信息、机构内部材料或受版权保护内容。反馈会公开显示，请只提供你有权公开的信息。
+  - type: checkboxes
+    id: consent
+    attributes:
+      label: 隐私确认
+      options:
+        - label: 本反馈不包含论文原文、个人信息或其他敏感内容。
+          required: true
+        - label: 我同意维护者在注明来源的情况下引用这份公开反馈。
+          required: true
+  - type: dropdown
+    id: use_case
+    attributes:
+      label: 使用场景
+      options:
+        - 学术段落重构
+        - 数字与引文审计
+        - 教学或写作训练
+        - Skill 开发参考
+        - 其他
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: 平台
+      options:
+        - Windows
+        - macOS
+        - Linux
+        - 其他
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: 实际结果
+      description: 描述你完成了什么、哪些功能有效，以及遇到的限制；不要提供稿件内容。
+    validations:
+      required: true
+  - type: textarea
+    id: reproducibility
+    attributes:
+      label: 可复现信息
+      description: 可选填写版本号、文件格式、匿名化命令或可公开的测试数据。

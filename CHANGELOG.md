@@ -13,6 +13,9 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 - Public roadmap, version targets, and release gates.
 - Cross-platform installation instructions and runnable audit examples.
 - CI, release, license, and test-status badges in the README.
+- Reproducible preserved-fact and changed-number audit examples.
+- Anonymous, privacy-safe usage feedback form.
+- Transparent adoption evidence and a documented Codex maintenance plan.
 
 ## [0.1.0] - 2026-08-17
 
