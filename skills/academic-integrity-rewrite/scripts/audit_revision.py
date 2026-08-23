@@ -24,7 +24,30 @@ MEASUREMENT_RE = re.compile(
     r"(?:\s*(?:\^\s*)?[−-]?\d+)?)(?![\w])",
 )
 BRACKET_CITATION_RE = re.compile(r"\[(?:\d+[a-z]?\s*(?:[-–,;]\s*\d+[a-z]?\s*)*)\]", re.I)
-AUTHOR_YEAR_RE = re.compile(r"\((?:[A-Z][A-Za-z'’-]+(?:\s+et\s+al\.)?[^()]{0,60}?\b(?:19|20)\d{2}[a-z]?)(?:\s*;[^()]+)?\)")
+# An author-year citation, optionally with a locator after the year.
+#
+# The locator tail matters more than it looks: `audit()` strips citations
+# before counting numbers, so a citation this pattern misses leaks its page
+# numbers into the *content* number audit. Before the tail was allowed,
+# `(Smith, 2020, p. 15)` -> `(Smith, 2020, pp. 15-16)` reported nothing under
+# citations and `15 -> 15-16` under numbers -- a citation edit misfiled as a
+# data error, which is the one confusion this tool exists to prevent.
+#
+# The surname alternative accepts a CJK character as well as a capital, for
+# GB/T 7714 documents that use author-year with Chinese surnames.
+#
+# Narrative citations (`Smith (2020) showed ...`) are deliberately NOT matched.
+# Recognising them means matching a bare `(2020)` and deciding from the
+# preceding token whether it is an author, which false-positives on ordinary
+# prose such as "the reactor (2020)". A documented miss is safer here than a
+# noisy detector: see test_narrative_citation_is_a_documented_limitation.
+AUTHOR_YEAR_RE = re.compile(
+    r"\((?:(?:[A-Z][A-Za-z'’-]+|[㐀-鿿]{1,4})(?:\s+et\s+al\.)?"
+    r"[^()]{0,60}?\b(?:19|20)\d{2}[a-z]?)"
+    # Locator: `, p. 15`, `, pp. 15-17`, `, 第15页`, `, S. 20`.
+    r"(?:\s*,\s*(?:pp?\.|S\.|第)?\s*\d+(?:\s*[-–—]\s*\d+)?\s*页?)?"
+    r"(?:\s*;[^()]+)?\)"
+)
 TOKEN_RE = re.compile(r"[A-Za-z]+(?:[-'][A-Za-z]+)*|\d+(?:\.\d+)?|[\u3400-\u9fff]")
 
 
