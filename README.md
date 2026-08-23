@@ -17,6 +17,13 @@
 - 附带零第三方依赖审计脚本，核对数字、带单位测量值、引文标记和长重合片段。
 - 支持 `.txt`、`.md` 和 `.docx` 文本审计。
 
+## 核心差异
+
+- **本地审计**：审计脚本在用户设备上运行，默认不上传论文、相似度报告或研究数据。
+- **受保护事实优先**：先建立数字、单位、公式、术语、图表编号和引文账本，再调整语言与论证结构。
+- **可验证而非“保证降重”**：对改写前后事实标记进行确定性比较，并明确要求人工回查原始证据。
+- **诚信边界明确**：拒绝规避检测、隐藏抄袭、伪造引用和不可见字符等用途。
+
 ## 安装
 
 ### 前置条件
@@ -119,6 +126,31 @@ python3 skills/academic-integrity-rewrite/scripts/audit_revision.py original.doc
 python3 skills/academic-integrity-rewrite/scripts/audit_revision.py original.md revised.md --json audit.json
 ```
 
+## 可复现案例与示例输出
+
+仓库提供一个事实保持案例和一个故意改变百分比的失败案例。示例数据由维护者创建，不包含用户论文，也不作为第三方采用证据。
+
+```bash
+# 保留 Re = 450、12.4%、25 °C 和引文 [12]；预期状态码 0
+python skills/academic-integrity-rewrite/scripts/audit_revision.py examples/original.txt examples/revised-preserved.txt
+
+# 将 12.4% 改为 12.8%；预期状态码 1
+python skills/academic-integrity-rewrite/scripts/audit_revision.py examples/original.txt examples/revised-changed.txt
+```
+
+成功案例的 `numbers`、`measurements` 和 `citations` 变更集合均为空。失败案例会同时报告缺失的 `12.4%` 和新增的 `12.8%`：
+
+```json
+{
+  "numbers": {
+    "missing_or_reduced": {"12.4%": 1},
+    "added_or_increased": {"12.8%": 1}
+  }
+}
+```
+
+完整输入、预期输出和复现说明见 [examples/README.md](examples/README.md)。
+
 ## 工作流
 
 1. 明确目标期刊、可修改范围和被标记段落。
@@ -133,6 +165,20 @@ python3 skills/academic-integrity-rewrite/scripts/audit_revision.py original.md 
 ## 项目状态与维护
 
 项目遵循语义化版本思路持续演进。当前优先级、目标版本与发布门槛见 [ROADMAP.md](ROADMAP.md)。路线图时间窗口是规划目标，不构成交付承诺。
+
+### 公开采用与反馈证据
+
+[![GitHub stars](https://img.shields.io/github/stars/lin1111-1/academic-integrity-rewrite?style=flat&label=stars)](https://github.com/lin1111-1/academic-integrity-rewrite/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/lin1111-1/academic-integrity-rewrite?style=flat&label=forks)](https://github.com/lin1111-1/academic-integrity-rewrite/forks)
+
+- Stars、Forks、发布记录和贡献者以 GitHub 的实时公开数据为准；这些指标不等同于活跃用户数或学术影响力。
+- 项目目前没有可公开核验的安装量、下载量或引用量，因此不声明这些数字。
+- 项目目前没有经过核验的第三方用户证言。欢迎通过 [Anonymous usage feedback](https://github.com/lin1111-1/academic-integrity-rewrite/issues/new?template=usage_feedback.yml) 提交不含稿件内容的公开反馈。
+- 任何采用或反馈声明都必须链接到可核验来源；维护者不会虚构用户、机构或使用效果。
+
+### Codex 维护计划
+
+Codex 将作为维护辅助工具，用于生成和审查回归测试、定位审计规则边界、扩展 APA/IEEE/GB/T 7714 引用形式、构造中英混合测试样例，以及研究 `.docx` 表格、脚注和文本框支持。所有行为变化仍需人工审查、确定性测试和 CI 验证；Codex 不代替维护者作出学术正确性或引用适当性判断。
 
 Bug、误报和改进建议请通过对应的 [GitHub Issue 模板](https://github.com/lin1111-1/academic-integrity-rewrite/issues/new/choose)提交。公开样例必须最小化并匿名；请勿上传未发表稿件、个人数据或敏感材料。安全漏洞请使用[私密安全报告](https://github.com/lin1111-1/academic-integrity-rewrite/security/advisories/new)。
 
