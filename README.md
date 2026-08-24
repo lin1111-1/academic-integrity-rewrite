@@ -126,6 +126,8 @@ python3 skills/academic-integrity-rewrite/scripts/audit_revision.py original.doc
 python3 skills/academic-integrity-rewrite/scripts/audit_revision.py original.md revised.md --json audit.json
 ```
 
+`.docx` 审计会读取正文中的普通段落、表格与内嵌文本框，以及脚注和尾注。当前不会读取页眉、页脚、批注、已删除的修订文字，或未以 WordprocessingML 文本保存的绘图内容；包含这些结构的文档仍需人工核对。
+
 ## 可复现案例与示例输出
 
 仓库提供一个事实保持案例和一个故意改变百分比的失败案例。示例数据由维护者创建，不包含用户论文，也不作为第三方采用证据。

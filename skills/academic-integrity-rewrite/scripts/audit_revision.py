@@ -13,6 +13,12 @@ from pathlib import Path
 from xml.etree import ElementTree as ET
 
 WORD_NS = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
+MC_NS = "{http://schemas.openxmlformats.org/markup-compatibility/2006}"
+DOCX_TEXT_PARTS = (
+    "word/document.xml",
+    "word/footnotes.xml",
+    "word/endnotes.xml",
+)
 NUMBER_RE = re.compile(r"(?<![\w.])[+-]?(?:\d+(?:\.\d+)?|\.\d+)(?:\s*[–—-]\s*[+-]?\d+(?:\.\d+)?)?\s*%?")
 MEASUREMENT_RE = re.compile(
     r"(?<![\w.])[+-]?(?:\d+(?:\.\d+)?|\.\d+)"
@@ -51,16 +57,61 @@ AUTHOR_YEAR_RE = re.compile(
 TOKEN_RE = re.compile(r"[A-Za-z]+(?:[-'][A-Za-z]+)*|\d+(?:\.\d+)?|[\u3400-\u9fff]")
 
 
+def iter_paragraphs(root: ET.Element):
+    if root.tag == MC_NS + "AlternateContent":
+        choices = [child for child in root if child.tag == MC_NS + "Choice"]
+        fallbacks = [child for child in root if child.tag == MC_NS + "Fallback"]
+        branches = choices + fallbacks
+        if branches:
+            branch = next(
+                (
+                    item
+                    for item in branches
+                    if any((text.text or "").strip() for text in item.iter(WORD_NS + "t"))
+                ),
+                branches[0],
+            )
+            yield from iter_paragraphs(branch)
+        return
+    if root.tag == WORD_NS + "p":
+        yield root
+    for child in root:
+        yield from iter_paragraphs(child)
+
+
+def paragraph_text(paragraph: ET.Element) -> str:
+    pieces: list[str] = []
+
+    def collect(node: ET.Element) -> None:
+        for child in node:
+            if child.tag == WORD_NS + "p":
+                continue
+            if child.tag == WORD_NS + "t":
+                pieces.append(child.text or "")
+            else:
+                collect(child)
+
+    collect(paragraph)
+    return "".join(pieces)
+
+
 def read_text(path: Path) -> str:
     if path.suffix.lower() != ".docx":
         return path.read_text(encoding="utf-8")
     with zipfile.ZipFile(path) as archive:
-        root = ET.fromstring(archive.read("word/document.xml"))
+        available_parts = set(archive.namelist())
+        parts = [ET.fromstring(archive.read(DOCX_TEXT_PARTS[0]))]
+        parts.extend(
+            ET.fromstring(archive.read(name))
+            for name in DOCX_TEXT_PARTS[1:]
+            if name in available_parts
+        )
     paragraphs = []
-    for paragraph in root.iter(WORD_NS + "p"):
-        text = "".join(node.text or "" for node in paragraph.iter(WORD_NS + "t"))
-        if text.strip():
-            paragraphs.append(text)
+    for root in parts:
+        for paragraph in iter_paragraphs(root):
+            text = paragraph_text(paragraph)
+            if text.strip():
+                paragraphs.append(text)
     return "\n".join(paragraphs)
 
 
