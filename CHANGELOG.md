@@ -16,6 +16,7 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 - Reproducible preserved-fact and changed-number audit examples.
 - Anonymous, privacy-safe usage feedback form.
 - Transparent adoption evidence and a documented Codex maintenance plan.
+- `.docx` audit coverage for tables, inline text boxes, footnotes, and endnotes, with documented format limitations.
 
 ## [0.1.0] - 2026-08-17
 

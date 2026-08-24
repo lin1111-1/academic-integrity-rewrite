@@ -15,6 +15,12 @@ SPEC.loader.exec_module(audit_revision)
 
 
 class AuditRevisionTests(unittest.TestCase):
+    def write_docx(self, path, document_xml, **additional_parts):
+        with zipfile.ZipFile(path, "w") as archive:
+            archive.writestr("word/document.xml", document_xml)
+            for name, content in additional_parts.items():
+                archive.writestr(f"word/{name}.xml", content)
+
     def test_preserved_numbers_and_citations(self):
         original = "At Re = 450, efficiency was 1.41 [12]."
         revised = "The measured efficiency reached 1.41 when Re = 450 [12]."
@@ -69,9 +75,102 @@ class AuditRevisionTests(unittest.TestCase):
 </w:document>'''
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "sample.docx"
-            with zipfile.ZipFile(path, "w") as archive:
-                archive.writestr("word/document.xml", document_xml)
+            self.write_docx(path, document_xml)
             self.assertEqual(audit_revision.read_text(path), "Preserved 1.41 [3].")
+
+    def test_reads_docx_tables_text_boxes_footnotes_and_endnotes(self):
+        document_xml = b'''<?xml version="1.0" encoding="UTF-8"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">
+  <w:body>
+    <w:tbl><w:tr><w:tc><w:p><w:r><w:t>Table value 42 kg [7].</w:t></w:r></w:p></w:tc></w:tr></w:tbl>
+    <w:p><w:r><mc:AlternateContent>
+      <mc:Choice Requires="wps"><w:drawing><w:txbxContent><w:p><w:r><w:t>Text box 12.5% [8].</w:t></w:r></w:p></w:txbxContent></w:drawing></mc:Choice>
+      <mc:Fallback><w:pict><w:txbxContent><w:p><w:r><w:t>Text box 12.5% [8].</w:t></w:r></w:p></w:txbxContent></w:pict></mc:Fallback>
+    </mc:AlternateContent></w:r></w:p>
+  </w:body>
+</w:document>'''
+        footnotes_xml = b'''<?xml version="1.0" encoding="UTF-8"?>
+<w:footnotes xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:footnote w:id="1"><w:p><w:r><w:t>Footnote 450 K [9].</w:t></w:r></w:p></w:footnote>
+</w:footnotes>'''
+        endnotes_xml = b'''<?xml version="1.0" encoding="UTF-8"?>
+<w:endnotes xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:endnote w:id="1"><w:p><w:r><w:t>Endnote 3.2 m [10].</w:t></w:r></w:p></w:endnote>
+</w:endnotes>'''
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "structures.docx"
+            self.write_docx(
+                path,
+                document_xml,
+                footnotes=footnotes_xml,
+                endnotes=endnotes_xml,
+            )
+            text = audit_revision.read_text(path)
+            self.assertIn("Table value 42 kg [7].", text)
+            self.assertIn("Text box 12.5% [8].", text)
+            self.assertEqual(text.count("Text box 12.5% [8]."), 1)
+            self.assertIn("Footnote 450 K [9].", text)
+            self.assertIn("Endnote 3.2 m [10].", text)
+
+    def test_audits_changes_in_docx_structures(self):
+        original_document = b'''<?xml version="1.0" encoding="UTF-8"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:body>
+    <w:tbl><w:tr><w:tc><w:p><w:r><w:t>Table value 42 kg [7].</w:t></w:r></w:p></w:tc></w:tr></w:tbl>
+    <w:p><w:r><w:drawing><w:txbxContent><w:p><w:r><w:t>Text box 12.5% [8].</w:t></w:r></w:p></w:txbxContent></w:drawing></w:r></w:p>
+  </w:body>
+</w:document>'''
+        revised_document = original_document.replace(b"42 kg", b"47 kg")
+        original_footnotes = b'''<?xml version="1.0" encoding="UTF-8"?>
+<w:footnotes xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:footnote w:id="1"><w:p><w:r><w:t>Footnote 450 K [9].</w:t></w:r></w:p></w:footnote>
+</w:footnotes>'''
+        revised_footnotes = original_footnotes.replace(b"[9]", b"[10]")
+        with tempfile.TemporaryDirectory() as directory:
+            original = Path(directory) / "original.docx"
+            revised = Path(directory) / "revised.docx"
+            self.write_docx(original, original_document, footnotes=original_footnotes)
+            self.write_docx(revised, revised_document, footnotes=revised_footnotes)
+            result = audit_revision.audit(
+                audit_revision.read_text(original),
+                audit_revision.read_text(revised),
+                4,
+                10,
+            )
+            self.assertIn("42kg", result["measurements"]["missing_or_reduced"])
+            self.assertIn("47kg", result["measurements"]["added_or_increased"])
+            self.assertIn("[9]", result["citations"]["missing_or_reduced"])
+            self.assertIn("[10]", result["citations"]["added_or_increased"])
+
+    def test_preserved_docx_structures_have_no_fidelity_warning(self):
+        original_document = b'''<?xml version="1.0" encoding="UTF-8"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:body>
+    <w:tbl><w:tr><w:tc><w:p><w:r><w:t>Table value 42 kg [7].</w:t></w:r></w:p></w:tc></w:tr></w:tbl>
+    <w:p><w:r><w:drawing><w:txbxContent><w:p><w:r><w:t>Text box 12.5% [8].</w:t></w:r></w:p></w:txbxContent></w:drawing></w:r></w:p>
+  </w:body>
+</w:document>'''
+        revised_document = original_document.replace(b"Table value", b"Measured value")
+        footnotes = b'''<?xml version="1.0" encoding="UTF-8"?>
+<w:footnotes xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:footnote w:id="1"><w:p><w:r><w:t>Footnote 450 K [9].</w:t></w:r></w:p></w:footnote>
+</w:footnotes>'''
+        revised_footnotes = footnotes.replace(b"Footnote", b"Supporting note")
+        with tempfile.TemporaryDirectory() as directory:
+            original = Path(directory) / "original.docx"
+            revised = Path(directory) / "revised.docx"
+            self.write_docx(original, original_document, footnotes=footnotes)
+            self.write_docx(revised, revised_document, footnotes=revised_footnotes)
+            result = audit_revision.audit(
+                audit_revision.read_text(original),
+                audit_revision.read_text(revised),
+                4,
+                10,
+            )
+            for category in ("numbers", "measurements", "citations"):
+                self.assertEqual(result[category]["missing_or_reduced"], {})
+                self.assertEqual(result[category]["added_or_increased"], {})
 
 
 if __name__ == "__main__":
