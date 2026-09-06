@@ -7,7 +7,16 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
-_No changes yet._
+## [0.2.0] - 2026-09-06
+
+### Added
+
+- Citation audit support for full-width Chinese parentheses, commas, and semicolons in author-year citations, including CJK surnames and page locators.
+- Regression coverage for mixed-language and full-width GB/T 7714 author-year citations, including a guard that classifies changed page locators as citation changes rather than numeric-data changes.
+
+### Changed
+
+- Documented the supported mixed-language citation forms and the deliberate limitation for narrative author-year citations, which remain manual-review items to avoid noisy false positives.
 
 ## [0.1.1] - 2026-08-28
 
@@ -46,6 +55,7 @@ _No changes yet._
 - The audit workflow runs locally and does not transmit manuscript contents.
 - Added guidance for handling unpublished manuscripts, similarity reports, personal data, and sensitive security reports.
 
-[Unreleased]: https://github.com/lin1111-1/academic-integrity-rewrite/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/lin1111-1/academic-integrity-rewrite/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/lin1111-1/academic-integrity-rewrite/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/lin1111-1/academic-integrity-rewrite/releases/tag/v0.1.1
 [0.1.0]: https://github.com/lin1111-1/academic-integrity-rewrite/releases/tag/v0.1.0
