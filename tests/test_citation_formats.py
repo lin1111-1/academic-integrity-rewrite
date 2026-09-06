@@ -60,6 +60,8 @@ AUTHOR_YEAR_FIXTURES = [
     ("apa german locator", "The trend holds (Placeholder, 2020, S. 20).", 1),
     ("gbt cjk surname", "趋势成立 (张, 2020)。", 1),
     ("gbt cjk surname locator", "趋势成立 (张伟, 2020, 第15页)。", 1),
+    ("gbt full-width punctuation", "趋势成立（张伟，2020，第15页）。", 1),
+    ("mixed-language full-width citation", "As Zhang notes（张伟，2020；Example, 2019），the trend holds.", 1),
 ]
 
 # Parenthesised text that must NOT be read as a citation. A pattern loose
@@ -207,6 +209,18 @@ class AlteredCitationTests(unittest.TestCase):
         )
         self.assertIn("(Placeholder,2020)", result["citations"]["missing_or_reduced"])
         self.assertIn("(Placeholder,2021)", result["citations"]["added_or_increased"])
+
+    def test_full_width_locator_change_is_a_citation_change_not_a_number_change(self):
+        result = audit_revision.audit(
+            "该结论与证据一致（张伟，2020，第15页）。",
+            "该结论与证据一致（张伟，2020，第16页）。",
+            4,
+            10,
+        )
+        self.assertIn("（张伟，2020，第15页）", result["citations"]["missing_or_reduced"])
+        self.assertIn("（张伟，2020，第16页）", result["citations"]["added_or_increased"])
+        self.assertEqual(result["numbers"]["missing_or_reduced"], {})
+        self.assertEqual(result["numbers"]["added_or_increased"], {})
 
     def test_dropped_chinese_citation_is_reported(self):
         result = audit_revision.audit(
