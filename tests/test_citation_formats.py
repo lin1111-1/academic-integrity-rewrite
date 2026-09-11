@@ -84,6 +84,41 @@ class BracketedCitationTests(unittest.TestCase):
                 self.assertEqual(len(found), expected, f"{label}: got {found}")
 
 
+class LatexCitationTests(unittest.TestCase):
+    """Natbib-style LaTeX citations are audited as protected citations."""
+
+    def test_latex_commands_are_recognised(self):
+        text = r"See \citep{Placeholder2020} and \citet[see][p. 15]{Example2021}."
+        self.assertEqual(
+            audit_revision.LATEX_CITATION_RE.findall(text),
+            [r"\citep{Placeholder2020}", r"\citet[see][p. 15]{Example2021}"],
+        )
+
+    def test_changed_latex_key_is_a_citation_change_not_a_number_change(self):
+        result = audit_revision.audit(
+            r"The result was retained in \citep{Placeholder2020}.",
+            r"The result was retained in \citep{Example2021}.",
+            4,
+            10,
+        )
+        self.assertIn(r"\citep{Placeholder2020}", result["citations"]["missing_or_reduced"])
+        self.assertIn(r"\citep{Example2021}", result["citations"]["added_or_increased"])
+        self.assertEqual(result["numbers"]["missing_or_reduced"], {})
+        self.assertEqual(result["numbers"]["added_or_increased"], {})
+
+    def test_latex_citation_notes_and_multiple_keys_are_preserved(self):
+        result = audit_revision.audit(
+            r"The result was retained in \citep[see][p. 15]{Placeholder2020,Other2019}.",
+            r"The retained result is reported in \citep[see][p. 15]{Placeholder2020,Other2019}.",
+            4,
+            10,
+        )
+        self.assertEqual(result["citations"]["missing_or_reduced"], {})
+        self.assertEqual(result["citations"]["added_or_increased"], {})
+        self.assertEqual(result["numbers"]["missing_or_reduced"], {})
+        self.assertEqual(result["numbers"]["added_or_increased"], {})
+
+
 class AuthorYearCitationTests(unittest.TestCase):
     """APA author-year citations, including locators and CJK surnames."""
 

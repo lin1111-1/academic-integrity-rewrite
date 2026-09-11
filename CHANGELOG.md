@@ -7,6 +7,17 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-09-11
+
+### Fixed
+
+- LaTeX `\\cite`, `\\citep`, `\\citet`, and related natbib-style commands are now audited as citations, including optional pre/post notes and year-like citation keys.
+- Citation key changes in `.tex` input no longer disappear from the citation report or leak into the content-number audit.
+
+### Added
+
+- Regression coverage for LaTeX citation commands, optional locators, and multiple citation keys.
+
 ## [0.2.0] - 2026-09-06
 
 ### Added
@@ -55,7 +66,8 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 - The audit workflow runs locally and does not transmit manuscript contents.
 - Added guidance for handling unpublished manuscripts, similarity reports, personal data, and sensitive security reports.
 
-[Unreleased]: https://github.com/lin1111-1/academic-integrity-rewrite/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/lin1111-1/academic-integrity-rewrite/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/lin1111-1/academic-integrity-rewrite/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/lin1111-1/academic-integrity-rewrite/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/lin1111-1/academic-integrity-rewrite/releases/tag/v0.1.1
 [0.1.0]: https://github.com/lin1111-1/academic-integrity-rewrite/releases/tag/v0.1.0

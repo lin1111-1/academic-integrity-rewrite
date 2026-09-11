@@ -56,6 +56,13 @@ AUTHOR_YEAR_RE = re.compile(
     r"(?:\s*[,，]\s*(?:pp?\.|S\.|第)?\s*\d+(?:\s*[-–—]\s*\d+)?\s*页?)?"
     r"(?:\s*[;；][^()（）]+)?[)）]"
 )
+# Common natbib and LaTeX citation commands. Optional bracket arguments cover
+# pre- and post-notes such as `\\citep[see][p. 15]{Key2020}`. The complete
+# command is treated as one citation so changing a key is visible as a
+# citation change and its year-like key is not misclassified as content data.
+LATEX_CITATION_RE = re.compile(
+    r"\\cite[a-zA-Z*]*(?:\s*\[[^\]]*\])*\s*\{[^{}]+\}"
+)
 TOKEN_RE = re.compile(r"[A-Za-z]+(?:[-'][A-Za-z]+)*|\d+(?:\.\d+)?|[\u3400-\u9fff]")
 
 
@@ -126,7 +133,7 @@ def tokenise(text: str) -> list[str]:
 
 
 def without_citations(text: str) -> str:
-    for pattern in (BRACKET_CITATION_RE, AUTHOR_YEAR_RE):
+    for pattern in (BRACKET_CITATION_RE, AUTHOR_YEAR_RE, LATEX_CITATION_RE):
         text = pattern.sub(" ", text)
     return text
 
@@ -159,8 +166,16 @@ def audit(original: str, revised: str, ngram: int, limit: int) -> dict[str, obje
     revised_numbers = normalized_items(NUMBER_RE, revised_without_citations)
     original_measurements = normalized_items(MEASUREMENT_RE, original_without_citations)
     revised_measurements = normalized_items(MEASUREMENT_RE, revised_without_citations)
-    original_citations = normalized_items(BRACKET_CITATION_RE, original) + normalized_items(AUTHOR_YEAR_RE, original)
-    revised_citations = normalized_items(BRACKET_CITATION_RE, revised) + normalized_items(AUTHOR_YEAR_RE, revised)
+    original_citations = (
+        normalized_items(BRACKET_CITATION_RE, original)
+        + normalized_items(AUTHOR_YEAR_RE, original)
+        + normalized_items(LATEX_CITATION_RE, original)
+    )
+    revised_citations = (
+        normalized_items(BRACKET_CITATION_RE, revised)
+        + normalized_items(AUTHOR_YEAR_RE, revised)
+        + normalized_items(LATEX_CITATION_RE, revised)
+    )
     spans = shared_spans(original, revised, ngram, limit)
     return {
         "numbers": {
