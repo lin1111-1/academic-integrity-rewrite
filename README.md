@@ -5,6 +5,10 @@
 [![License: MIT](https://img.shields.io/github/license/lin1111-1/academic-integrity-rewrite)](LICENSE)
 [![Tests](https://img.shields.io/github/actions/workflow/status/lin1111-1/academic-integrity-rewrite/validate.yml?branch=main&label=tests)](https://github.com/lin1111-1/academic-integrity-rewrite/actions/workflows/validate.yml)
 
+<!-- yarkr:badges:start -->
+[![Indexed on Yarkr](https://api.yarkr.com/functions/v1/api/api/v1/badges/repos/lin1111-1/academic-integrity-rewrite/version.svg)](https://yarkr.com/arks/lin1111-1/academic-integrity-rewrite)
+<!-- yarkr:badges:end -->
+
 一个面向 Codex 的中英文学术论文诚信降重 Skill：从研究逻辑和证据链重构表达，同时保护数字、单位、公式、术语、图表编号与引文。
 
 它解决的是“如何写得更清楚、更原创”，不是“如何骗过检测器”。项目不会承诺特定查重平台的分数，也不支持隐藏抄袭、伪造引用或用不可见字符规避审查。
@@ -197,3 +201,35 @@ Bug、误报和改进建议请通过对应的 [GitHub Issue 模板](https://gith
 ## 许可
 
 [MIT License](LICENSE)。使用本项目时，使用者仍需遵守所在机构、期刊与司法辖区的学术诚信、隐私和著作权要求。
+
+<!-- yarkr:install:start -->
+## Install with Yarkr
+
+This repo is indexed on [Yarkr](https://yarkr.com/arks/lin1111-1/academic-integrity-rewrite) as the ark [lin1111-1/academic-integrity-rewrite](https://yarkr.com/arks/lin1111-1/academic-integrity-rewrite), so its skills install into Claude Code, Codex, Cursor and other agent harnesses with one command.
+
+### CLI
+
+Install the whole ark, which Yarkr keeps equal to this repo:
+
+```bash
+npx yarkr-cli sync lin1111-1/academic-integrity-rewrite
+```
+
+Or add individual skills:
+
+```bash
+npx yarkr-cli add skill:lin1111-1/academic-integrity-rewrite/academic-integrity-rewrite
+```
+
+No Node.js? `curl -fsSL https://yarkr.com/install.sh | sh` (macOS, Linux) or `irm https://yarkr.com/install.ps1 | iex` (Windows PowerShell) installs `yarkr` as a standalone binary; then type `yarkr` in place of `npx yarkr-cli`.
+
+### MCP
+
+Connect your agent to the ark over MCP:
+
+```bash
+npx yarkr-cli mcp add lin1111-1/academic-integrity-rewrite
+```
+
+Or point any MCP client at `https://api.yarkr.com/functions/v1/api/mcp/o/lin1111-1/academic-integrity-rewrite`.
+<!-- yarkr:install:end -->
